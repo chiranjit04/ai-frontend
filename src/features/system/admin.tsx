@@ -74,7 +74,15 @@ export default function Admin() {
   const downloadSampleCSV = () => {
     const csv = `id,question,option1,option2,option3,option4,correctAnswer
 1,What is React?,Library,Framework,Language,Database,Library
-2,What is Redux?,State manager,API tool,Database,Framework,State manager`;
+2,What is Redux?,State manager,API tool,Database,Framework,State manager
+3,What is Redux?,State manager,API tool,Database,Framework,State manager
+4,What is Redux?,State manager,API tool,Database,Framework,State manager
+5,What is Redux?,State manager,API tool,Database,Framework,State manager
+6,What is Redux?,State manager,API tool,Database,Framework,State manager
+7,What is Redux?,State manager,API tool,Database,Framework,State manager
+8,What is Redux?,State manager,API tool,Database,Framework,State manager
+9,What is Redux?,State manager,API tool,Database,Framework,State manager
+10,What is Redux?,State manager,API tool,Database,Framework,State manager`;
 
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
