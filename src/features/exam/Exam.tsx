@@ -55,7 +55,7 @@ export default function Exam() {
 
   return (
     <>
-      <div className="h-screen flex gap-6 p-6  bg-slate-900 text-black">
+      <div className="h-screen flex gap-6 p-4  bg-slate-900 text-black">
         {/* Exam info */}
 
         <div className="w-[400px] p-6 rounded-2xl bg-white border border-gray-200 space-y-5">

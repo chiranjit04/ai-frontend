@@ -6,22 +6,7 @@ import { addUserMessage, sendMessage } from "../../features/chat/chatSlice";
 
 import dog from "../../assets/dog-icon.png";
 
-interface ChatMessage {
-  id: string;
-  text: string;
-  sender: 'user' | 'bot';
-  timestamp: Date;
-}
-
-type Message = {
-  role: "user" | "bot";
-  text: string;
-  fileName?: string;
-  file?: File | null;
-};
-
 export default function ChatBot() {
-
   const dispatch = useDispatch();
   const { messages, loading } = useSelector((state: RootState) => state.chat);
 
@@ -49,7 +34,7 @@ export default function ChatBot() {
         text: input,
         fileName,
         file,
-      })
+      }),
     );
 
     dispatch(sendMessage(formData) as any);
@@ -65,14 +50,14 @@ export default function ChatBot() {
     }
   }, [messages]);
 
-  const filteredMessages = messages.filter((msg) =>
-    msg.text.toLowerCase().includes(search.toLowerCase())
+  const filteredMessages = messages?.filter((msg) =>
+    msg?.text?.toLowerCase().includes(search.toLowerCase()),
   );
-  
+
+  const messageRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
   return (
-   
-<div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-800 via-slate-900 to-[#2a487a] text-white font-sans">
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-800 via-slate-900 to-[#2a487a] text-white font-sans">
       <div className="relative w-[1300px] h-[700px] rounded-3xl backdrop-blur-xl border border-white/10 shadow-2xl flex overflow-hidden">
         {/* Sidebar */}
         <div
@@ -93,6 +78,12 @@ export default function ChatBot() {
             {filteredMessages.map((msg, i) => (
               <div
                 key={i}
+                onClick={() => {
+                  messageRefs.current[i]?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                }}
                 className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/10 cursor-pointer"
               >
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-sm">
@@ -144,6 +135,7 @@ export default function ChatBot() {
               {messages.map((msg, i) => (
                 <div
                   key={i}
+                  ref={(el) => (messageRefs.current[i] = el)}
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
@@ -248,4 +240,4 @@ export default function ChatBot() {
       </div>
     </div>
   );
-};
+}
