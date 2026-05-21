@@ -10,13 +10,13 @@ import Login from "./features/auth/login";
 import ProtectedRoute from "./features/auth/protectedRoute";
 import { AdminRoute } from "./features/auth/adminRoute";
 import Header from "./components/header";
+import { UserRoute } from "./features/auth/userRoute";
 
 export default function App() {
   const [showExam, setShowExam] = useState(false);
 
   return (
     <Routes>
-
       {/* 🔐 LOGIN (public) */}
       <Route path="/login" element={<Login />} />
 
@@ -25,33 +25,19 @@ export default function App() {
         path="/"
         element={
           <ProtectedRoute>
-            <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800">
-              <Header />
-              <div
-                className={`pt-5 flex h-full transition-transform duration-500 ${
-                  showExam ? "-translate-x-1/2" : "translate-x-0"
-                }`}
-                style={{ width: "200%" }}
-              >
-                <div className="w-1/2 h-full">
-                  <Exam />
-                </div>
-
-                <div className="w-1/2 h-full">
-                  <ChatBot />
-                </div>
-              </div>
-
-              <div className="absolute top-1/2 left-1/1 -translate-x-1/2 -translate-y-1/2 z-50">
-                <button
-                  onClick={() => setShowExam(!showExam)}
-                  className="w-10 h-20 flex items-center justify-center bg-white/20 text-white backdrop-blur-md border border-white/20 rounded-full"
+            <UserRoute>
+              <div className="pt-10 relative w-full min-h-screen overflow-y-auto overflow-x-hidden bg-gradient-to-br from-slate-900 to-slate-800">
+                <Header />
+                <div
+                  className={`flex h-full transition-transform translate-x-0 duration-500`}
+                  style={{ width: "200%" }}
                 >
-                  {showExam ? "❮" : "❯"}
-                </button>
+                  <div className="w-1/2 h-full">
+                    <Exam />
+                  </div>
+                </div>
               </div>
-
-            </div>
+            </UserRoute>
           </ProtectedRoute>
         }
       />
@@ -71,11 +57,19 @@ export default function App() {
         path="/admin"
         element={
           <AdminRoute>
-            <Admin />
+            {showExam ? <ChatBot /> : <Admin />}
+
+            <div className="fixed top-1/2 left-1/1 -translate-x-1/2 -translate-y-1/2 z-50">
+              <button
+                onClick={() => setShowExam(!showExam)}
+                className="w-10 h-20 flex items-center justify-center bg-white/20 text-white backdrop-blur-md border border-white/20 rounded-full"
+              >
+                {showExam ? "❮" : "❯"}
+              </button>
+            </div>
           </AdminRoute>
         }
       />
-
     </Routes>
   );
 }

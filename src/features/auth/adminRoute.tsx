@@ -1,12 +1,14 @@
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
-export function AdminRoute({ children }: any) {
+export const AdminRoute = ({ children }: any) => {
   const user = useSelector((state: any) => state.auth.user);
 
-  if (!user || user.role !== "admin") {
-    return <Navigate to="/" />;
+  if (!user) return <Navigate to="/login" />;
+
+  if (user.role !== "admin") {
+    return <Navigate to="/" />; // or show "Access Denied"
   }
 
   return children;
-}
+};

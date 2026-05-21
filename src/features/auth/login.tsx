@@ -11,6 +11,15 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
+
+    //  const allowedUsers = JSON.parse(
+    //    localStorage.getItem("allowedUsers") || "[]",
+    //  );
+
+    //  if (!allowedUsers.includes(username)) {
+    //    alert("You are not allowed to take this exam ❌");
+    //    return;
+    //  }
     // 🔐 simple demo auth
     if (username === "admin" && password === "admin123") {
       dispatch(login({ username, role: "admin" }));
