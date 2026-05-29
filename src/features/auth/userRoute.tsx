@@ -8,8 +8,8 @@ export const UserRoute = ({ children }: any) => {
   if (!user) return <Navigate to="/login" />;
 
   // ❌ Admin not allowed
-  if (user.role === "admin") {
-    return <Navigate to="/admin" />; // redirect admin away
+  if ( ['ADMIN','TUTOR'].includes(user.type)) {
+    return <Navigate to="/tutor" />; // redirect admin away
   }
 
   // ✅ Only normal users allowed
