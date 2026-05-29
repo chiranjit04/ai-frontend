@@ -3,32 +3,36 @@ import { useDispatch } from "react-redux";
 import { login } from "./authSlice";
 import { useNavigate } from "react-router-dom";
 
+import { loginUser } from "../../service/auth.service";
+
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] =  useState("");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
+  try {
+    const response = await loginUser({
+      email,
+      password,
+    });
 
-    //  const allowedUsers = JSON.parse(
-    //    localStorage.getItem("allowedUsers") || "[]",
-    //  );
+    dispatch(login(response));
 
-    //  if (!allowedUsers.includes(username)) {
-    //    alert("You are not allowed to take this exam ❌");
-    //    return;
-    //  }
-    // 🔐 simple demo auth
-    if (username === "admin" && password === "admin123") {
-      dispatch(login({ username, role: "admin" }));
-      navigate("/admin");
-    } else {
-      dispatch(login({ username, role: "user" }));
-      navigate("/");
+    // ROLE BASED REDIRECT
+    console.log(response.user.type)
+    if (['ADMIN','TUTOR'].includes(response.user.type)) {
+      navigate("/tutor");
+    } else if (response.user.type === "CANDIDATE") {
+      navigate("/exam");
     }
-  };
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
     <div className="h-screen flex items-center justify-center bg-slate-900">
@@ -37,9 +41,9 @@ export default function Login() {
         <h2 className="text-lg font-bold mb-4">Login</h2>
 
         <input
-          placeholder="Username"
+          placeholder="Email"
           className="w-full mb-3 p-2 border rounded"
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <input

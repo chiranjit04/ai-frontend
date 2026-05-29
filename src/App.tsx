@@ -4,13 +4,13 @@ import { useState } from "react";
 import Result from "./features/exam/result";
 import ChatBot from "./features/chat/chatBot";
 import Exam from "./features/exam/Exam";
-import Admin from "./features/system/admin";
 
 import Login from "./features/auth/login";
 import ProtectedRoute from "./features/auth/protectedRoute";
 import { AdminRoute } from "./features/auth/adminRoute";
 import Header from "./components/header";
 import { UserRoute } from "./features/auth/userRoute";
+import Tutor from "./features/system/tutor";
 
 export default function App() {
   const [showExam, setShowExam] = useState(false);
@@ -54,10 +54,10 @@ export default function App() {
 
       {/* 🔐 ADMIN ONLY */}
       <Route
-        path="/admin"
+        path="/tutor"
         element={
           <AdminRoute>
-            {showExam ? <ChatBot /> : <Admin />}
+            {showExam ? <ChatBot /> : <Tutor />}
 
             <div className="fixed top-1/2 left-1/1 -translate-x-1/2 -translate-y-1/2 z-50">
               <button
