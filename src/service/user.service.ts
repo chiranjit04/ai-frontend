@@ -37,6 +37,12 @@ export const getStudents =
     return response.data;
   };
 
+  export const updateExam = async (examId: string, payload: any) => {
+    const response = await api.put(`/exam/${examId}`, payload);
+
+    return response.data;
+  };
+
   export const deleteExam =
   async (
     examId: string

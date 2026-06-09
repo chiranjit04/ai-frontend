@@ -11,6 +11,7 @@ import {
   listOfExams,
   createExam,
   deleteExam,
+  updateExam
 } from "../../service/user.service";
 import RegisterModal from "../../components/registration/registerModal";
 import { showSuccess, showError } from "../../service/toast.service";
@@ -35,6 +36,9 @@ const [examDescription, setExamDescription] = useState("");
 const [duration, setDuration] = useState(60);
 
 const [totalMarks, setTotalMarks] = useState(100);
+const [isEditOpen, setIsEditOpen] = useState(false);
+
+const [selectedExam, setSelectedExam] = useState<any>(null);
 
 const schema = yup.object({
   examTitle: yup
@@ -104,28 +108,14 @@ const {
   if (!result.isConfirmed) {
     return;
   }
-
     try {
-
-      await deleteExam(
-        examId
-      );
-
-      showSuccess(
-        "Exam deleted successfully"
-      );
-
+      await deleteExam(examId);
+      showSuccess("Exam deleted successfully");
       await refreshExamList();
-
     } catch (
       err: any
     ) {
-
-      showError(
-        err?.response?.data
-          ?.error ||
-          "Delete failed"
-      );
+      showError(err?.response?.data?.error || "Delete failed");
     }
   };
 
@@ -141,13 +131,11 @@ const {
         setDomains(
           domainData.sort((a: any, b: any) => {
             if (a.name === "Others") return -1;
-
             return a.name.localeCompare(b.name);
           }),
         );
 
         setStudents(studentData);
-
         setExams(examData);
         console.log(examData);
       } catch (err) {
@@ -162,7 +150,6 @@ const {
   const handleFileUpload = (e: any) => {
     const file = e.target.files[0];
     setFileName(file.name); // ✅ show file name
-
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
@@ -205,6 +192,35 @@ const {
     });
   };
 
+  const openEditModal = (exam: any) => {
+    setSelectedExam(exam);
+    setExamTitle(exam.title);
+    setExamDescription(exam.description);
+    setDuration(exam.duration_minutes);
+    setTotalMarks(exam.total_marks);
+    setSelectedDomain(exam.domain_id || "");
+    setSelectedUsers(
+      students.filter((student: any) =>
+        exam.students?.some(
+          (selected: any) => Number(selected.id) === Number(student.id),
+        ),
+      ),
+    );
+    setIsEditOpen(true);
+    console.log("Exam Students", exam.students);
+
+const matchedStudents = students.filter((student: any) =>
+  exam.students?.some(
+    (selected: any) =>
+      Number(selected.id) === Number(student.id)
+  )
+);
+
+console.log("Matched Students", matchedStudents);
+
+setSelectedUsers(matchedStudents);
+  };
+
   // ✅ Download Sample CSV
   const downloadSampleCSV = () => {
     const csv = `question,option1,option2,option3,option4,correctAnswer
@@ -225,9 +241,11 @@ const {
 
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
-  const handleUserSelect = (user: string) => {
+  const handleUserSelect = (user: any) => {
     setSelectedUsers((prev) =>
-      prev.includes(user) ? prev.filter((u) => u !== user) : [...prev, user],
+      prev.some((u) => u.id === user.id)
+        ? prev.filter((u) => u.id !== user.id)
+        : [...prev, user],
     );
   };
 
@@ -267,6 +285,13 @@ const {
       await createExam(payload);
 
       showSuccess("Exam created successfully");
+      refreshExamList();
+      setSelectedUsers([]);
+      setQuestions([]);
+      setExamTitle("");
+      setExamDescription("");
+      setDuration(60);
+      setTotalMarks(100);
     } catch (err: any) {
       console.error(err);
 
@@ -420,21 +445,11 @@ const {
                 )}
               </div>
 
-              {/* Download */}
-              <div className="p-2 border shadow-md rounded-xl bg-gray-50 text-center">
-                <button
-                  onClick={downloadSampleCSV}
-                  className="px-4 py-2 bg-green-600 text-white rounded"
-                >
-                  Download Format
-                </button>
-              </div>
-
               {/* Participants */}
               <div className="p-4 border shadow-md rounded-xl bg-gray-50">
                 {/* 🔽 DOMAIN DROPDOWN */}
                 <div className="mb-3">
-                  <label className="text-sm text-gray-600 mb-1 block">
+                  <label className="text-sm font-semibold text-justify mb-1 block">
                     Select Domain
                   </label>
 
@@ -453,7 +468,7 @@ const {
                   </select>
                 </div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold">Participants</h3>
+                  <label className="font-semibold text-sm">Participants</label>
 
                   <button
                     onClick={() => setIsModalOpen(true)}
@@ -504,26 +519,48 @@ const {
 
                 <div className="w-full max-h-[250px] overflow-y-auto border rounded-xl p-3 bg-gray-50">
                   <div className="flex flex-wrap gap-2">
-                    {filteredUsers.map((user) => (
-                      <div
-                        key={user.id}
-                        onClick={() => handleUserSelect(user)}
-                        className={`px-3 py-2 rounded-full text-sm cursor-pointer border transition break-words max-w-full ${
-                          selectedUsers.some((u: any) => u.id === user.id)
-                            ? "bg-blue-500 text-white border-blue-500"
-                            : "bg-white hover:bg-gray-200"
-                        }`}
-                      >
-                        {user.first_name} {user.last_name}
-                      </div>
-                    ))}
+                    {filteredUsers.map((user: any) => {
+                      const isAssigned = Number(user.assigned) === 1;
+
+                      const isSelected = selectedUsers.some(
+                        (u: any) => Number(u.id) === Number(user.id),
+                      );
+
+                      return (
+                        <div
+                          key={user.id}
+                          onClick={() => {
+                            if (isAssigned) return;
+
+                            handleUserSelect(user);
+                          }}
+                          title={
+                            isAssigned
+                              ? "Already assigned to an active exam"
+                              : ""
+                          }
+                          className={`px-3 py-2 rounded-full text-sm border transition-all
+
+          ${
+            isAssigned
+              ? "bg-red-500 text-white border-red-500 cursor-not-allowed"
+              : isSelected
+                ? "bg-blue-500 text-white border-blue-500 cursor-pointer"
+                : "bg-white text-gray-800 border-gray-300 hover:bg-gray-100 cursor-pointer"
+          }
+        `}
+                        >
+                          {user.first_name} {user.last_name}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-
-                <div className="text-center mt-3 text-sm">
-                  {selectedUsers.length} selected
-                </div>
-
+                {selectedUsers.length>0 ? (
+                  <div className="text-center mt-3 text-sm">
+                    {selectedUsers.length} selected
+                  </div>
+                ): ""}
                 <button
                   onClick={handleSubmit(saveParticipants)}
                   className="mt-3 w-full px-4 py-2 bg-green-500 text-white rounded"
@@ -541,7 +578,14 @@ const {
 
                 <ul className="list-disc pl-5 space-y-1">
                   <li>
-                    Download the sample format using <b>"Download Format"</b>.
+                    Download the sample format using{" "}
+                    <b
+                      onClick={downloadSampleCSV}
+                      className="text-blue-500 cursor-pointer"
+                    >
+                      "Download Format"
+                    </b>
+                    .
                   </li>
                   <li>Open the file in Excel or Google Sheets.</li>
                   <li>Fill in the questions, options, and correct answers.</li>
@@ -685,15 +729,20 @@ const {
                             ● {exam.status}
                           </td>
                           <td className="p-3 text-left flex gap-2">
-                            <button className="p-2 rounded-lg bg-yellow-100 text-yellow-600 hover:bg-yellow-200" title="Edit">
-              
-                              <Pencil size={18} />
+                            <button
+                              className="p-2 rounded-lg bg-yellow-100 text-yellow-600 hover:bg-yellow-200"
+                              title="Edit"
+                            >
+                              <Pencil
+                                size={18}
+                                onClick={() => openEditModal(exam)}
+                              />
                             </button>
                             <button
                               onClick={() => handleDelete(exam.exam_id)}
                               className="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200"
-                            title="Delete">
-                              
+                              title="Delete"
+                            >
                               <Trash2 size={18} />
                             </button>
                           </td>
@@ -707,6 +756,186 @@ const {
           </div>
         </div>
       </div>
+      {/* Update Exam Modal */}
+      {isEditOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white text-black rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+
+            <div className="sticky top-0 z-10 bg-white border-b px-4 py-2 flex justify-between">
+              <div>
+                <h2 className="text-xl text-justify font-semibold text-gray-800">
+                  Update Exam
+                </h2>
+
+                <p className="text-sm text-gray-500">
+                  Update exam details and participants
+                </p>
+              </div>
+
+              <button
+                onClick={() => setIsEditOpen(false)}
+                className="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600 transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Body */}
+
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-justify text-sm font-semibold mb-1">
+                  Exam Title
+                </label>
+
+                <input
+                  value={examTitle}
+                  onChange={(e) => setExamTitle(e.target.value)}
+                  className="w-full border rounded-lg p-2"
+                />
+              </div>
+
+              <div>
+                <label className="block text-justify text-sm font-semibold mb-1">
+                  Description
+                </label>
+
+                <textarea
+                  value={examDescription}
+                  onChange={(e) => setExamDescription(e.target.value)}
+                  rows={3}
+                  className="w-full border rounded-lg p-2"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-justify text-sm font-semibold mb-1">
+                    Duration
+                  </label>
+
+                  <input
+                    type="number"
+                    value={duration}
+                    onChange={(e) => setDuration(Number(e.target.value))}
+                    className="w-full border rounded-lg p-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-justify text-sm font-semibold mb-1">
+                    Total Marks
+                  </label>
+
+                  <input
+                    type="number"
+                    value={totalMarks}
+                    onChange={(e) => setTotalMarks(Number(e.target.value))}
+                    className="w-full border rounded-lg p-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-justify text-sm font-semibold mb-1">
+                  Domain
+                </label>
+
+                <select
+                  value={selectedDomain}
+                  onChange={(e) => setSelectedDomain(e.target.value)}
+                  className="w-full border rounded-lg p-2"
+                >
+                  {domains.map((domain: any) => (
+                    <option key={domain.domain_id} value={domain.domain_id}>
+                      {domain.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Participants */}
+
+              <div>
+                <label className="block text-justify text-sm font-semibold mb-2">
+                  Participants
+                </label>
+
+                <div className="max-h-[220px] overflow-y-auto border rounded-lg p-3">
+                  <div className="flex flex-wrap gap-2 justify-center max-h-[300px] overflow-auto">
+                    {filteredUsers.map((user: any) => {
+                      const isSelected = selectedUsers.some(
+                        (u: any) => Number(u.id) === Number(user.id),
+                      );
+                      const isAssigned = Number(user.assigned) === 1;
+                      return (
+                        <div
+                          key={user.id}
+                          onClick={() => {
+                            if (isAssigned) return;
+
+                            handleUserSelect(user);
+                          }}
+                          title={
+                            isAssigned
+                              ? "Already assigned to an active exam"
+                              : ""
+                          }
+                          className={`px-3 py-2 rounded-full border text-sm transition-all
+                          ${
+                            isSelected
+                              ? "bg-blue-500 text-white border-blue-500"
+                              : isAssigned
+                                ? "bg-red-500 text-white border-red-500 cursor-not-allowed"
+                                : "bg-white text-gray-800 border-gray-300 hover:bg-gray-100 cursor-pointer"
+                          }
+                          `}
+                        >
+                          {user.first_name} {user.last_name}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={async () => {
+                  const payload = {
+                    title: examTitle,
+
+                    description: examDescription,
+
+                    domain_id: selectedDomain,
+
+                    duration_minutes: duration,
+
+                    total_marks: totalMarks,
+
+                    participants: selectedUsers.map((user: any) => user.id),
+                  };
+
+                  try {
+                    await updateExam(selectedExam.exam_id, payload);
+
+                    showSuccess("Exam updated successfully");
+
+                    await refreshExamList();
+
+                    setIsEditOpen(false);
+                  } catch (err: any) {
+                    showError(err?.response?.data?.error || "Update failed");
+                  }
+                }}
+                className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+              >
+                Update Exam
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Update Exam Modal */}
     </div>
   );
 }

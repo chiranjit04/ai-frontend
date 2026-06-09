@@ -7,7 +7,7 @@ export const store = configureStore({
   reducer: {
     chat: chatReducerBot,
     exam: examReducer,
-    auth: authReducer
+    auth: authReducer,
   },
 });
 
