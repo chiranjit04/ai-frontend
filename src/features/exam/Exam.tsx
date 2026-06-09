@@ -1,8 +1,10 @@
-import { questions } from "./examData";
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
 import { selectAnswer, prevQuestion, nextQuestion } from "./examSlice";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { setExam, setQuestions } from "./examSlice";
+import { enrolledExamCheck, getExamQuestions } from "../../service/exam.service";
+import { useSelector } from "react-redux";
 
 export default function Exam() {
   const dispatch = useAppDispatch();
@@ -12,9 +14,7 @@ export default function Exam() {
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
   const navigate = useNavigate();
-  const { currentIndex, answers } = useAppSelector((state) => state.exam);
-
-  const currentQuestion = questions[currentIndex];
+  //const { currentIndex, answers } = useAppSelector((state) => state.exam);
 
   const calculateResult = () => {
     let score = 0;
@@ -28,22 +28,47 @@ export default function Exam() {
     return score;
   };
 
+  const { exam, questions, currentIndex, answers } = useSelector(
+    (state: any) => state.exam,
+  );
+
+  const currentQuestion =
+  questions?.[currentIndex];
+
+useEffect(() => {
+  const loadExam = async () => {
+    try {
+      const exam = await enrolledExamCheck();
+
+      dispatch(setExam(exam));
+
+      const questions = await getExamQuestions(exam.exam_id);
+
+      dispatch(setQuestions(questions));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  loadExam();
+}, [dispatch]);
+
   useEffect(() => {
-  if (!startExam || showResult) return;
+    if (!startExam || showResult) return;
 
-  const interval = setInterval(() => {
-    setTimeLeft((prev) => {
-      if (prev <= 1) {
-        clearInterval(interval);
-        setShowResult(true);
-        return 0;
-      }
-      return prev - 1;
-    });
-  }, 1000);
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setShowResult(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-  return () => clearInterval(interval);
-}, [startExam, showResult]);
+    return () => clearInterval(interval);
+  }, [startExam, showResult]);
 
   const formatTime = (seconds: number) => {
   const hrs = Math.floor(seconds / 3600);
@@ -52,6 +77,12 @@ export default function Exam() {
 
   return `${String(hrs).padStart(2, "0")} : ${String(mins).padStart(2, "0")} : ${String(secs).padStart(2, "0")}`;
 };
+
+useEffect(() => {
+  if (exam?.duration_minutes) {
+    setTimeLeft(exam.duration_minutes * 60);
+  }
+}, [exam]);
 
   return (
     <>
@@ -62,7 +93,7 @@ export default function Exam() {
           {/* TEST */}
           <div className="p-4 rounded-xl border border-gray-200">
             <p className="text-green-600 font-semibold mb-1">Test</p>
-            <p className="text-gray-800 text-sm">Aptitude Test</p>
+            <p className="text-gray-800 text-sm">{exam?.title}</p>
           </div>
 
           {/* TIMER */}
@@ -122,10 +153,10 @@ export default function Exam() {
           </div>
 
           {/* NEXT TEST */}
-          <div className="p-4 rounded-xl border border-gray-200">
+          {/* <div className="p-4 rounded-xl border border-gray-200">
             <p className="text-green-600 font-semibold mb-1">Next Test</p>
             <p className="text-gray-800 text-sm">Academic Aptitude Test</p>
-          </div>
+          </div> */}
         </div>
 
         {/* Exam content */}
@@ -191,8 +222,7 @@ export default function Exam() {
               <div className="mt-6 flex justify-end gap-4">
                 <button
                   onClick={() => dispatch(prevQuestion())}
-                  className="px-5 py-2 bg-gray-500 rounded-xl hover:bg-gray-600"
-                >
+                  className="px-5 py-2 bg-gray-500 rounded-xl hover:bg-gray-600">
                   Back
                 </button>
                 <button

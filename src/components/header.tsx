@@ -20,13 +20,13 @@ export default function Header() {
   <div className="flex items-center gap-3">
 
     <img
-      src="/logo-png-1.png"
+      src="/logo-img.png"
       alt="Mock Test"
       className="w-10 h-10 object-contain"
     />
 
     <div className="text-white font-semibold text-lg tracking-wide">
-      MOCK TEST <span className="text-green-400">SYSTEM</span>
+      PREP <span className="text-green-400">PILOT</span>
     </div>
   </div>
 
