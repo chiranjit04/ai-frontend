@@ -2,8 +2,8 @@ import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
 import { selectAnswer, prevQuestion, nextQuestion } from "./examSlice";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { setExam, setQuestions } from "./examSlice";
-import { enrolledExamCheck, getExamQuestions } from "../../service/exam.service";
+import { setExam, setQuestions, setScore } from "./examSlice";
+import { enrolledExamCheck, getExamQuestions, submitExam } from "../../service/exam.service";
 import { useSelector } from "react-redux";
 
 export default function Exam() {
@@ -12,21 +12,9 @@ export default function Exam() {
   const [startExam, setStartExam] = useState(false);
   const [timeLeft, setTimeLeft] = useState(INITIAL_TIME);
   const [showResult, setShowResult] = useState(false);
-  const [score, setScore] = useState(0);
+  //const [score, setScore] = useState(0);
   const navigate = useNavigate();
   //const { currentIndex, answers } = useAppSelector((state) => state.exam);
-
-  const calculateResult = () => {
-    let score = 0;
-
-    questions.forEach((q) => {
-      if (answers[q.id] === q.answer) {
-        score++;
-      }
-    });
-
-    return score;
-  };
 
   const { exam, questions, currentIndex, answers } = useSelector(
     (state: any) => state.exam,
@@ -86,7 +74,7 @@ useEffect(() => {
 
   return (
     <>
-      <div className="h-screen flex gap-6 p-4  bg-slate-900 text-black">
+      <div className="h-screen flex gap-6 p-4  bg-[#90E29D] text-black">
         {/* Exam info */}
 
         <div className="w-[400px] p-6 rounded-2xl bg-white border border-gray-200 space-y-5">
@@ -222,17 +210,24 @@ useEffect(() => {
               <div className="mt-6 flex justify-end gap-4">
                 <button
                   onClick={() => dispatch(prevQuestion())}
-                  className="px-5 py-2 bg-gray-500 rounded-xl hover:bg-gray-600">
+                  className="px-5 py-2 bg-gray-500 rounded-xl hover:bg-gray-600"
+                >
                   Back
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (currentIndex === questions.length - 1) {
-                      const result = calculateResult();
-                      setScore(result);
-                      navigate("/result");
-                      setShowResult(true);
-                      setTimeLeft(INITIAL_TIME);
+                      try {
+                        const result = await submitExam(exam.exam_id, answers);
+
+                        console.log(result);
+                        setShowResult(true);
+                        navigate("/result", {
+                          state: result,
+                        });
+                      } catch (err) {
+                        console.error(err);
+                      }
                     } else {
                       dispatch(nextQuestion());
                     }

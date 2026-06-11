@@ -162,7 +162,8 @@ const {
               !q.option2 ||
               !q.option3 ||
               !q.option4 ||
-              !q.correctAnswer
+              !q.correctAnswer ||
+              !q.marks
             ) {
               throw new Error(`Missing data at row ${index + 1}`);
             }
@@ -180,6 +181,7 @@ const {
               question: q.question,
               options: [q.option1, q.option2, q.option3, q.option4],
               correctAnswer: q.correctAnswer,
+              marks: Number(q.marks) || 1,
             };
           });
           console.log(formatted);
@@ -223,10 +225,10 @@ setSelectedUsers(matchedStudents);
 
   // ✅ Download Sample CSV
   const downloadSampleCSV = () => {
-    const csv = `question,option1,option2,option3,option4,correctAnswer
-    What is React?,Library,Framework,Language,Database,Library
-    What is Angular?,State manager,API tool,Database,Framework,State manager
-    What is Java?,State manager,API tool,Database,Framework,State manager`;
+    const csv = `question,option1,option2,option3,option4,correctAnswer,marks
+    What is React?,Library,Framework,Language,Database,Library,1
+    What is Angular?,State manager,API tool,Database,Framework,State manager,1
+    What is Java?,State manager,API tool,Database,Framework,State manager,1`;
 
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -311,7 +313,7 @@ setSelectedUsers(matchedStudents);
     <div className="min-h-screen bg-slate-900 text-white p-6">
       <Header />
       <div className="pt-4">
-        <div className="mx-auto bg-white text-black p-2 rounded-xl">
+        <div className="mx-auto bg-gradient-to-r from-[#90E29D] to-[#d8eadb] text-black p-2 rounded-xl">
           <h1 className="text-2xl font-bold mb-6 text-center">Admin Panel</h1>
 
           <div className="flex gap-6">
@@ -634,7 +636,7 @@ setSelectedUsers(matchedStudents);
                           <th className="p-2">Q</th>
                           <th className="p-2">Question</th>
                           <th className="p-2">Correct</th>
-                          <th className="p-2">Status</th>
+                          <th className="p-2">Marks</th>
                         </tr>
                       </thead>
 
@@ -652,17 +654,8 @@ setSelectedUsers(matchedStudents);
                               <td className="p-2">{i + 1}</td>
                               <td className="p-2">{q.question}</td>
                               <td className="p-2">{q.correctAnswer}</td>
-                              <td className="p-2">
-                                {isValid ? (
-                                  <span className="text-green-600">
-                                    ✔ Valid
-                                  </span>
-                                ) : (
-                                  <span className="text-red-600">
-                                    ❌ Invalid
-                                  </span>
-                                )}
-                              </td>
+                              <td className="p-2">{q.marks || 1}</td>
+                              
                             </tr>
                           );
                         })}
