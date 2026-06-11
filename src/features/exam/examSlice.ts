@@ -9,11 +9,12 @@ interface ExamState {
   questions: any[];
 
   loading: boolean;
+  score: number;
 }
 
 const initialState: ExamState = {
   currentIndex: 0,
-
+  score: 0,
   answers: {},
 
   exam: null,
@@ -46,6 +47,9 @@ const examSlice = createSlice({
     ) => {
       state.answers[action.payload.questionId] = action.payload.answer;
     },
+    setScore: (state, action: PayloadAction<number>) => {
+      state.score = action.payload;
+    },
 
     prevQuestion: (state) => {
       if (state.currentIndex > 0) {
@@ -67,6 +71,8 @@ const examSlice = createSlice({
       state.exam = null;
 
       state.questions = [];
+
+      state.score = 0;
     },
   },
 });
@@ -78,6 +84,7 @@ export const {
   prevQuestion,
   nextQuestion,
   resetExam,
+  setScore
 } = examSlice.actions;
 
 export default examSlice.reducer;

@@ -1,4 +1,6 @@
 import axios from "axios";
+import { toast }
+  from "react-toastify";
 
 const api = axios.create({
   baseURL: "http://localhost:5000/api",
@@ -26,6 +28,22 @@ api.interceptors.request.use(
   },
 
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// RESPONSE INTERCEPTOR
+api.interceptors.response.use(
+  (response) => response,
+
+  (error) => {
+
+    const message =
+      error?.response?.data?.error ||
+      "Something went wrong";
+
+    toast.error(message);
+
     return Promise.reject(error);
   }
 );

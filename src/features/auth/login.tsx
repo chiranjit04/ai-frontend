@@ -44,7 +44,7 @@ export default function Login() {
 };
 
   return (
-    <div className="h-screen overflow-hidden bg-[#e8f3ea] flex items-center justify-center p-2 lg:p-4">
+    <div className="h-screen overflow-hidden bg-gradient-to-r from-[#90E29D] to-[#2a487a] flex items-center justify-center p-2 lg:p-4">
       <div className="w-full max-w-4xl h-[95vh] bg-white rounded-[30px] overflow-hidden shadow-[0_0_80px_rgba(163,201,170,0.45)]">
         <div className="grid h-full lg:grid-cols-2">
           {/* LEFT PANEL */}
