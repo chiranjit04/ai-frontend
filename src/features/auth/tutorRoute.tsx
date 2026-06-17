@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
-export const AdminRoute = ({
+export const TutorRoute = ({
   children,
 }: any) => {
 
@@ -13,8 +13,8 @@ export const AdminRoute = ({
     return <Navigate to="/login" />;
   }
 
-  if (user.type !== "ADMIN") {
-    return <Navigate to="/unauthorized" />;
+  if (user.type !== "TUTOR") {
+    return <Navigate to="/" />;
   }
 
   return children;

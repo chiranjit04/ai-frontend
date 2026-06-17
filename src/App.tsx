@@ -11,6 +11,11 @@ import { AdminRoute } from "./features/auth/adminRoute";
 import Header from "./components/header";
 import { UserRoute } from "./features/auth/userRoute";
 import Tutor from "./features/system/tutor";
+import NoExam from "./features/exam/no-exam";
+import ForgotPassword from "./features/auth/forgot-password";
+import ResetPassword from "./features/auth/reset-password";
+import Admin from "./features/system/admin";
+import { TutorRoute } from "./features/auth/tutorRoute";
 
 export default function App() {
   const [showExam, setShowExam] = useState(false);
@@ -42,7 +47,20 @@ export default function App() {
         }
       />
 
+      <Route path="/no-exam" element={<NoExam />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+
       {/* 🔐 RESULT PAGE (protected) */}
+      <Route
+        path="/admin"
+        element={
+          <AdminRoute>
+            <Admin />
+          </AdminRoute>
+        }
+      />
+
       <Route
         path="/result"
         element={
@@ -56,7 +74,7 @@ export default function App() {
       <Route
         path="/tutor"
         element={
-          <AdminRoute>
+         <TutorRoute>
             {showExam ? <ChatBot /> : <Tutor />}
 
             <div className="fixed top-1/2 left-1/1 -translate-x-1/2 -translate-y-1/2 z-50">
@@ -67,7 +85,7 @@ export default function App() {
                 {showExam ? "❮" : "❯"}
               </button>
             </div>
-          </AdminRoute>
+          </TutorRoute>
         }
       />
     </Routes>

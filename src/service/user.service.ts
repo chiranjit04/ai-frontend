@@ -1,13 +1,28 @@
 import api from "./interceptor";
 
-export const getStudents =
-  async () => {
-    const response = await api.get(
-      "/users/students"
-    );
 
-    return response.data;
-  };
+export const getTutors = async () => {
+  const response = await api.get("/users/teachers");
+  return response.data;
+};
+
+export const forgotPassword = async (email: string) => {
+  const response = await api.post("/auth/forgot-password", { email });
+  return response.data;
+};
+
+export const resetPassword = async (token: string, password: string) => {
+  const response = await api.post("/auth/reset-password", {
+    token,
+    password,
+  });
+  return response.data;
+};
+
+export const getStudents = async () => {
+  const response = await api.get("/users/students");
+  return response.data;
+};
 
   export const registerUser =
   async (payload: unknown) => {
