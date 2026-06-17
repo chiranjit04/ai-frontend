@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { login } from "./authSlice";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import { loginUser } from "../../service/auth.service";
@@ -18,6 +18,30 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const user = useSelector(
+  (state: any) => state.auth.user
+);
+
+if (user) {
+
+  if (user.type === "ADMIN") {
+
+    return (
+      <Navigate
+        to="/admin"
+        replace
+      />
+    );
+  }
+
+  return (
+    <Navigate
+      to="/"
+      replace
+    />
+  );
+}
+
   const handleLogin = async () => {
   try {
     const response = await loginUser({
@@ -28,7 +52,9 @@ export default function Login() {
     dispatch(login(response));
 
     // ROLE BASED REDIRECT
-    if (['ADMIN','TUTOR'].includes(response.user.type)) {
+    if (response.user.type === "ADMIN") {
+      navigate("/admin");
+    } else if (response.user.type === "TUTOR") {
       navigate("/tutor");
     } else if (response.user.type === "CANDIDATE") {
       navigate("/");
@@ -56,10 +82,8 @@ export default function Login() {
             />
 
             <h2 className="mt-6 text-3xl xl:text-4xl font-bold text-slate-800">
-             <span className="font-medium text-slate-800">
-                    Prep
-                  </span>{" "}
-                  <span className="text-[#7ca27f]">Pilot</span>
+              <span className="font-medium text-slate-800">Prep</span>{" "}
+              <span className="text-[#7ca27f]">Pilot</span>
             </h2>
 
             <HeroSlider />
@@ -84,15 +108,11 @@ export default function Login() {
               {/* LOGO */}
               <div className="text-center mb-8 mt-8">
                 <h1 className="text-[38px] xl:text-[48px] font-light tracking-wide">
-                  <span className="font-medium text-slate-800">
-                    Prep
-                  </span>{" "}
+                  <span className="font-medium text-slate-800">Prep</span>{" "}
                   <span className="text-[#7ca27f]">Pilot</span>
                 </h1>
 
-                <p className="text-gray-500 mt-2">
-                  Student Examination Portal
-                </p>
+                <p className="text-gray-500 mt-2">Student Examination Portal</p>
               </div>
 
               {/* EMAIL */}
@@ -106,9 +126,7 @@ export default function Login() {
                   value={email}
                   placeholder="Enter your email"
                   onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && handleLogin()
-                  }
+                  onKeyDown={(e) => e.key === "Enter" && handleLogin()}
                   className="w-full h-14 px-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300"
                 />
               </div>
@@ -124,20 +142,14 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     placeholder="Enter your password"
-                    onChange={(e) =>
-                      setPassword(e.target.value)
-                    }
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && handleLogin()
-                    }
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleLogin()}
                     className="w-full h-14 px-4 pr-16 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300"
                   />
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowPassword(!showPassword)
-                    }
+                    onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-500"
                   >
                     {showPassword ? "Hide" : "Show"}
@@ -151,15 +163,13 @@ export default function Login() {
                   <input
                     type="checkbox"
                     checked={rememberMe}
-                    onChange={() =>
-                      setRememberMe(!rememberMe)
-                    }
+                    onChange={() => setRememberMe(!rememberMe)}
                   />
-
                   Remember Me
                 </label>
 
                 <button
+                  onClick={() => navigate("/forgot-password")}
                   type="button"
                   className="text-[#6b8f70] text-sm hover:underline"
                 >
@@ -186,9 +196,7 @@ export default function Login() {
               <div className="flex items-center my-8">
                 <div className="flex-1 border-t border-gray-300"></div>
 
-                <span className="px-4 text-gray-400 text-sm">
-                  OR
-                </span>
+                <span className="px-4 text-gray-400 text-sm">OR</span>
 
                 <div className="flex-1 border-t border-gray-300"></div>
               </div>
@@ -223,7 +231,6 @@ export default function Login() {
               </div>
 
               {/* FOOTER */}
-             
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from "../../hooks/reduxHooks";
 import { selectAnswer, prevQuestion, nextQuestion } from "./examSlice";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { setExam, setQuestions, setScore } from "./examSlice";
 import { enrolledExamCheck, getExamQuestions, submitExam } from "../../service/exam.service";
 import { useSelector } from "react-redux";
@@ -20,26 +20,34 @@ export default function Exam() {
     (state: any) => state.exam,
   );
 
+  const loadedRef = useRef(false);
+
   const currentQuestion =
   questions?.[currentIndex];
 
-useEffect(() => {
-  const loadExam = async () => {
-    try {
-      const exam = await enrolledExamCheck();
-
-      dispatch(setExam(exam));
-
-      const questions = await getExamQuestions(exam.exam_id);
-
-      dispatch(setQuestions(questions));
-    } catch (err) {
-      console.error(err);
+  useEffect(() => {
+    if (loadedRef.current) {
+      return;
     }
-  };
+    loadedRef.current = true;
+    const loadExam = async () => {
+      try {
+        const exam = await enrolledExamCheck();
+        dispatch(setExam(exam));
+        const questions = await getExamQuestions(exam.exam_id);
+        dispatch(setQuestions(questions));
+      } catch (err: any) {
+        const message = err?.response?.data?.error;
+        if (message === "No exam assigned") {
+          navigate("/no-exam");
+          return;
+        }
+        console.error(err);
+      }
+    };
 
-  loadExam();
-}, [dispatch]);
+    loadExam();
+  }, [dispatch, navigate]);
 
   useEffect(() => {
     if (!startExam || showResult) return;
@@ -225,7 +233,15 @@ useEffect(() => {
                         navigate("/result", {
                           state: result,
                         });
-                      } catch (err) {
+                      } catch (err: any) {
+                        const message = err?.response?.data?.error;
+
+                        if (
+                          message === "You have already submitted this exam."
+                        ) {
+                          navigate("/no-exam");
+                          return;
+                        }
                         console.error(err);
                       }
                     } else {

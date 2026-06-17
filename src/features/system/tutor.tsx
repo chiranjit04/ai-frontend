@@ -310,15 +310,15 @@ setSelectedUsers(matchedStudents);
   );
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white p-6">
+    <div className="min-h-screen bg-slate-900 text-white p-2 sm:p-4 md:p-6">
       <Header />
       <div className="pt-4">
-        <div className="mx-auto bg-gradient-to-r from-[#90E29D] to-[#d8eadb] text-black p-2 rounded-xl">
+        <div className="mx-auto bg-gradient-to-r from-[#90E29D] to-[#d8eadb] text-black p-3 md:p-4 rounded-xl">
           <h1 className="text-2xl font-bold mb-6 text-center">Admin Panel</h1>
 
-          <div className="flex gap-6">
+          <div className="flex flex-col xl:flex-row gap-6">
             {/* 🔹 LEFT SIDE (SMALL WIDTH) */}
-            <div className="w-[30%] space-y-6">
+            <div className="w-full xl:w-[30%] space-y-6">
               {/* Upload */}
               <div className="p-4 border shadow-md rounded-xl bg-gray-50 space-y-4">
                 <h3 className="font-semibold text-lg">Upload Questions</h3>
@@ -369,7 +369,7 @@ setSelectedUsers(matchedStudents);
 
                 {/* DURATION + TOTAL */}
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-justify block text-sm font-medium mb-1">
                       Duration<span className="text-red-500">*</span>
@@ -422,7 +422,7 @@ setSelectedUsers(matchedStudents);
 
                   <label
                     htmlFor="csvUpload"
-                    className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer transition"
+                    className="inline-block w-full sm:w-auto text-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer transition"
                   >
                     Upload
                   </label>
@@ -474,7 +474,7 @@ setSelectedUsers(matchedStudents);
 
                   <button
                     onClick={() => setIsModalOpen(true)}
-                    className="text-sm px-3 py-1 rounded-lg border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition whitespace-nowrap"
+                    className="text-xs sm:text-sm px-2 sm:px-3 py-1 rounded-lg border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition whitespace-nowrap"
                   >
                     + Add Participants
                   </button>
@@ -573,7 +573,7 @@ setSelectedUsers(matchedStudents);
             </div>
 
             {/* 🔹 RIGHT SIDE (LARGE WIDTH) */}
-            <div className="w-[70%] space-y-6">
+            <div className="w-full xl:w-[70%] space-y-6">
               {/* Instructions */}
               <div className="p-2 bg-gray-100 rounded-xl text-left text-xs text-gray-700 space-y-2">
                 <h3 className="font-semibold text-base">Instructions:</h3>
@@ -629,8 +629,8 @@ setSelectedUsers(matchedStudents);
                   </div>
 
                   {/* Table */}
-                  <div className="overflow-auto max-h-[350px] border rounded-lg">
-                    <table className="w-full text-sm">
+                  <div className="overflow-x-auto overflow-y-auto max-h-[350px] border rounded-lg">
+                    <table className="min-w-[700px] w-full text-sm">
                       <thead className="bg-gray-200 sticky top-0">
                         <tr>
                           <th className="p-2">Q</th>
@@ -685,8 +685,8 @@ setSelectedUsers(matchedStudents);
                 </div>
 
                 {/* Table */}
-                <div className="overflow-auto max-h-[350px] border rounded-lg">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto overflow-y-auto max-h-[350px] border rounded-lg">
+                  <table className="min-w-[700px] w-full text-sm">
                     {/* Header */}
                     <thead className="bg-gray-100 text-gray-700">
                       <tr>
@@ -752,7 +752,7 @@ setSelectedUsers(matchedStudents);
       {/* Update Exam Modal */}
       {isEditOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white text-black rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white text-black rounded-xl shadow-xl w-[95%] md:w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             {/* Header */}
 
             <div className="sticky top-0 z-10 bg-white border-b px-4 py-2 flex justify-between">
@@ -802,7 +802,7 @@ setSelectedUsers(matchedStudents);
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-justify text-sm font-semibold mb-1">
                     Duration
@@ -856,7 +856,7 @@ setSelectedUsers(matchedStudents);
                 </label>
 
                 <div className="max-h-[220px] overflow-y-auto border rounded-lg p-3">
-                  <div className="flex flex-wrap gap-2 justify-center max-h-[300px] overflow-auto">
+                  <div className="flex flex-wrap gap-2 justify-start max-h-[300px] overflow-auto">
                     {filteredUsers.map((user: any) => {
                       const isSelected = selectedUsers.some(
                         (u: any) => Number(u.id) === Number(user.id),
