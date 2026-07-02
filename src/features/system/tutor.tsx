@@ -5,13 +5,15 @@ import { useDeferredValue } from "react";
 import { getDomains } from "../../service/domain.service";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
+import { X } from "lucide-react";
 import {
   getStudents,
   registerUser,
   listOfExams,
   createExam,
   deleteExam,
-  updateExam
+  updateExam,
+  deleteStudent
 } from "../../service/user.service";
 import RegisterModal from "../../components/registration/registerModal";
 import { showSuccess, showError } from "../../service/toast.service";
@@ -251,6 +253,35 @@ setSelectedUsers(matchedStudents);
     );
   };
 
+  const handleDeleteStudent = async (studentId: number) => {
+    const result = await Swal.fire({
+      title: "Delete Student?",
+      text: "This action cannot be undone.",
+      icon: "warning",
+      width: 320,
+      showCancelButton: true,
+      confirmButtonText: "Delete",
+      customClass: {
+         popup: "small-swal",
+         title: "text-l font-semibold",
+       }
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    try {
+      await deleteStudent(studentId);
+
+      showSuccess("Student deleted successfully");
+
+      await refreshStudents();
+    } catch (err: any) {
+      showError(err?.response?.data?.error);
+    }
+  };
+
   const saveParticipants = async () => {
     localStorage.setItem("allowedUsers", JSON.stringify(selectedUsers));
     try {
@@ -302,9 +333,7 @@ setSelectedUsers(matchedStudents);
   };
 
   const [search, setSearch] = useState("");
-
   const deferredSearch = useDeferredValue(search);
-
   const filteredUsers = students.filter((user) =>
     user.first_name.toLowerCase().includes(deferredSearch.toLowerCase()),
   );
@@ -553,6 +582,28 @@ setSelectedUsers(matchedStudents);
         `}
                         >
                           {user.first_name} {user.last_name}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteStudent(user.id);
+                            }}
+                            className="
+                                  ml-2
+                                  w-6 h-6
+                                  inline-flex
+                                  items-center
+                                  justify-center
+                                  rounded-full
+                                  bg-white/80
+                                  text-red-500
+                                  hover:bg-red-100
+                                  hover:text-red-600
+                                  transition
+                                "
+                                title="Delete"
+                          >
+                            <X size={14} />
+                          </button>
                         </div>
                       );
                     })}

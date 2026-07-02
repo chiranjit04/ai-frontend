@@ -1,5 +1,9 @@
 import api from "./interceptor";
 
+export const deleteStudent = async (studentId: number) => {
+  const response = await api.delete(`/users/students/${studentId}`);
+  return response.data;
+};
 
 export const getTutors = async () => {
   const response = await api.get("/users/teachers");
