@@ -18,9 +18,7 @@ export default function Admin() {
   const loadTutors = async () => {
     try {
       dispatch(setLoading(true));
-
       const data = await getTutors();
-
       dispatch(setTutors(data));
     } finally {
       dispatch(setLoading(false));

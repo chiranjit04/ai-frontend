@@ -21,9 +21,55 @@ export default function Exam() {
   );
 
   const loadedRef = useRef(false);
+  const isSubmitting = useRef(false);
 
   const currentQuestion =
   questions?.[currentIndex];
+
+  //* Handle exam submission *//
+  const submitExamHandler = async (
+    examId: string,
+    answersData: Record<string, string>,
+  ) => {
+    if (isSubmitting.current) return;
+    isSubmitting.current = true;
+    try {
+      const result = await submitExam(examId, answersData);
+      setShowResult(true);
+      navigate("/result", {
+        state: result,
+      });
+    } catch (err: any) {
+      isSubmitting.current = false;
+      const message = err?.response?.data?.error;
+
+      if (message === "You have already submitted this exam.") {
+        navigate("/no-exam");
+        return;
+      }
+
+      console.error(err);
+    }
+  };
+  const submitRef = useRef(submitExamHandler);
+  useEffect(() => {
+    submitRef.current = submitExamHandler;
+  });
+
+
+  //* Handle visibility change to submit exam when user switches tabs *//
+  useEffect(() => {
+    if (!startExam || showResult) return;
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        submitRef.current(exam.exam_id, answers);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [startExam, showResult, exam, answers]);
 
   useEffect(() => {
     if (loadedRef.current) {
@@ -79,6 +125,7 @@ useEffect(() => {
     setTimeLeft(exam.duration_minutes * 60);
   }
 }, [exam]);
+
 
   return (
     <>
@@ -223,27 +270,9 @@ useEffect(() => {
                   Back
                 </button>
                 <button
-                  onClick={async () => {
+                  onClick={() => {
                     if (currentIndex === questions.length - 1) {
-                      try {
-                        const result = await submitExam(exam.exam_id, answers);
-
-                        console.log(result);
-                        setShowResult(true);
-                        navigate("/result", {
-                          state: result,
-                        });
-                      } catch (err: any) {
-                        const message = err?.response?.data?.error;
-
-                        if (
-                          message === "You have already submitted this exam."
-                        ) {
-                          navigate("/no-exam");
-                          return;
-                        }
-                        console.error(err);
-                      }
+                      submitExamHandler(exam.exam_id, answers);
                     } else {
                       dispatch(nextQuestion());
                     }
