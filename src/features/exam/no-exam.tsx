@@ -9,7 +9,7 @@ export default function NoExam() {
   return (
 
     <div className="h-screen flex items-center justify-center bg-[#90E29D]">
-<Header />
+        <Header />
       <div className="bg-white p-8 rounded-xl">
 
         <h2 className="text-2xl font-bold">
